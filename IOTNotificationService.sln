@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35222.181
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IOTNotificationService", "IOTNotificationService\IOTNotificationService.csproj", "{91D4B9F7-1A9C-487C-BA19-4EB0B6FF9B10}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{91D4B9F7-1A9C-487C-BA19-4EB0B6FF9B10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91D4B9F7-1A9C-487C-BA19-4EB0B6FF9B10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91D4B9F7-1A9C-487C-BA19-4EB0B6FF9B10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91D4B9F7-1A9C-487C-BA19-4EB0B6FF9B10}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {839A7916-5830-44D5-B3AF-3100BB574FBA}
+	EndGlobalSection
+EndGlobal
