@@ -1,4 +1,8 @@
 ﻿using MongoDB.Bson;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 public class Program
 {
@@ -15,50 +19,47 @@ public class Program
             return;
         }
 
-        // Fetch and process all customers
-        await FetchAndProcessCustomers(context);
+        // Fetch and process all digital services
+        await FetchAndProcessDigitalServices(context);
     }
 
-    public static async Task FetchAndProcessCustomers(MongoDBContext context)
+    public static async Task FetchAndProcessDigitalServices(MongoDBContext context)
     {
-        var allCustomers = await context.GetAllCustomersAsync();
+        var allDigitalServices = await context.GetAllDigitalServicesAsync();
 
-        if (allCustomers.Count == 0)
+        if (allDigitalServices.Count == 0)
         {
-            Console.WriteLine("No customers found.");
+            Console.WriteLine("No digital services found.");
             return;
         }
 
-        Console.WriteLine($"Total customers retrieved: {allCustomers.Count}");
+        Console.WriteLine($"Total digital services retrieved: {allDigitalServices.Count}");
 
-        foreach (var customer in allCustomers)
+        var today = DateTime.UtcNow;
+
+        foreach (var service in allDigitalServices)
         {
-            // Extract digital services for each customer
-            var digitalServices = customer.GetValue("DigitalServices", new BsonArray()).AsBsonArray;
+            var serviceStartDate = service.GetValue("ServiceStartDate", DateTime.MinValue).ToUniversalTime();
+            var serviceEndDate = service.GetValue("ServiceEndDate", DateTime.MinValue).ToUniversalTime();
+            var notificationUsers = service.GetValue("NotificationUsers", new BsonArray()).AsBsonArray.Select(u => u.AsString).ToList();
 
-            foreach (var service in digitalServices)
+            // Check if the service is expiring within the next 10 days
+            var daysUntilExpiration = (serviceEndDate - today).TotalDays;
+
+            if (daysUntilExpiration <= 10 && daysUntilExpiration >= 0)
             {
-                // Assuming DigitalServiceID is stored as a string in the MongoDB document
-                var digitalServiceIdString = service.AsBsonDocument.GetValue("DigitalServiceID").AsString;
-                if (!Guid.TryParse(digitalServiceIdString, out Guid digitalServiceId))
-                {
-                    Console.WriteLine($"Invalid GUID format: {digitalServiceIdString}");
-                    continue;
-                }
+                Console.WriteLine($"Digital Service {service.GetValue("DigitalServiceID")} is expiring soon!");
 
-                // Fetch notification users for this digital service
-                var notificationUsers = await context.GetNotificationUsersAsync(digitalServiceId);
-
-                // Send emails to notification users
-                foreach (var user in notificationUsers)
+                foreach (var userEmail in notificationUsers)
                 {
-                    var email = user.GetValue("Email").AsString;
-                    var name = user.GetValue("Name").AsString;
-                    var subject = "Notification Subject";
-                    var body = $"Hello {name}, this is a notification email.";
-                    await EmailService.SendEmailAsync(email, subject, body);
+                    var subject = "Upcoming Expiration Notification";
+                    var body = $"Hello,\n\nYour digital service with ID {service.GetValue("DigitalServiceID")} is expiring on {serviceEndDate.ToShortDateString()}. Please take necessary actions.\n\nThank you.";
+
+                    // Send email notification
+                    await EmailService.SendEmailAsync(userEmail, subject, body);
                 }
             }
         }
     }
+
 }

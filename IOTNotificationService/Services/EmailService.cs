@@ -1,14 +1,48 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net.Mail;
+using System.Net.Sockets;
+using System.Net;
 
 public static class EmailService
 {
-    public static Task SendEmailAsync(string to, string subject, string body)
+    private static readonly string smtpServer = "smtp.gmail.com";
+    private static readonly int smtpPort = 587;
+    private static readonly string smtpUser = "dotnettesting60@gmail.com";
+    private static readonly string smtpPassword = "pyzvbigfwuhkyxek";
+
+    public static async Task SendEmailAsync(string toEmail, string subject, string body)
     {
-        // Replace this with actual email sending logic.
-        // For now, it just prints to the console.
-        Console.WriteLine($"Sending email to {to}");
-        Console.WriteLine($"Subject: {subject}");
-        Console.WriteLine($"Body: {body}");
-        return Task.CompletedTask;
+        try
+        {
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(smtpUser),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true
+            };
+
+            mailMessage.To.Add(toEmail);
+
+            using (var smtpClient = new SmtpClient(smtpServer, smtpPort))
+            {
+                smtpClient.Credentials = new NetworkCredential(smtpUser, smtpPassword);
+                smtpClient.EnableSsl = true;
+
+                await smtpClient.SendMailAsync(mailMessage);
+                Console.WriteLine($"Email sent to {toEmail} successfully.");
+            }
+        }
+        catch (SmtpException ex)
+        {
+            Console.WriteLine($"SMTP error: {ex.Message}");
+        }
+        catch (SocketException ex)
+        {
+            Console.WriteLine($"Socket error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to send email to {toEmail}. Error: {ex.Message}");
+        }
     }
 }

@@ -2,6 +2,7 @@
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 public class MongoDBContext
@@ -46,24 +47,32 @@ public class MongoDBContext
         }
     }
 
-    public async Task<List<BsonDocument>> GetNotificationUsersAsync(Guid digitalServiceId)
+    public async Task<List<BsonDocument>> GetAllDigitalServicesAsync()
     {
         try
         {
-            var filter = Builders<BsonDocument>.Filter.Eq("DigitalServiceID", digitalServiceId);
-            var digitalService = await _digitalServicesCollection.Find(filter).FirstOrDefaultAsync();
-
-            if (digitalService != null)
+            var pipeline = new[]
             {
-                var notificationUsersArray = digitalService.GetValue("NotificationUsers", new BsonArray()).AsBsonArray;
-                return notificationUsersArray.Select(doc => doc.AsBsonDocument).ToList();
-            }
+                // Unwind the DigitalServices array
+                new BsonDocument("$unwind", "$DigitalServices"),
 
-            return new List<BsonDocument>();
+                // Project the required fields
+                new BsonDocument("$project", new BsonDocument
+                {
+                    { "_id", 0 },
+                    { "DigitalServiceID", "$DigitalServices.DigitalServiceID" },
+                    { "ServiceStartDate", "$DigitalServices.ServiceStartDate" },
+                    { "ServiceEndDate", "$DigitalServices.ServiceEndDate" },
+                    { "NotificationUsers", "$DigitalServices.NotificationUsers" }
+                })
+            };
+
+            var results = await _customersCollection.Aggregate<BsonDocument>(pipeline).ToListAsync();
+            return results;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error fetching notification users: {ex.Message}");
+            Console.WriteLine($"Error fetching digital services: {ex.Message}");
             return new List<BsonDocument>();
         }
     }
