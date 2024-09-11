@@ -9,7 +9,7 @@ public static class EmailService
     private static readonly string smtpUser = "dotnettesting60@gmail.com";
     private static readonly string smtpPassword = "pyzvbigfwuhkyxek";
 
-    public static async Task SendEmailAsync(string toEmail, string subject, string body)
+    public static async Task SendEmail(string email, string subject, string body)
     {
         try
         {
@@ -21,7 +21,7 @@ public static class EmailService
                 IsBodyHtml = true
             };
 
-            mailMessage.To.Add(toEmail);
+            mailMessage.To.Add(email);
 
             using (var smtpClient = new SmtpClient(smtpServer, smtpPort))
             {
@@ -29,7 +29,7 @@ public static class EmailService
                 smtpClient.EnableSsl = true;
 
                 await smtpClient.SendMailAsync(mailMessage);
-                Console.WriteLine($"Email sent to {toEmail} successfully.");
+                Console.WriteLine($"Email sent to {email} successfully.");
             }
         }
         catch (SmtpException ex)
@@ -42,7 +42,7 @@ public static class EmailService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to send email to {toEmail}. Error: {ex.Message}");
+            Console.WriteLine($"Failed to send email to {email}. Error: {ex.Message}");
         }
     }
 }
