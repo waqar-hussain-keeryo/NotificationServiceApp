@@ -10,12 +10,24 @@ public class Program
         bool connectionTest = await context.TestConnectionAsync();
         if (!connectionTest)
         {
-            Console.WriteLine("Failed to connect to MongoDB.");
+            Console.WriteLine("Failed to connect Database.");
             return;
         }
 
-        // Fetch and process all digital services
-        await FetchAndProcessDigitalServices(context);
+        while (true)
+        {
+            try
+            {
+                await FetchAndProcessDigitalServices(context);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+
+            await Task.Delay(TimeSpan.FromMinutes(10));
+        }
+
     }
 
     private static async Task FetchAndProcessDigitalServices(MongoDBContext context)
